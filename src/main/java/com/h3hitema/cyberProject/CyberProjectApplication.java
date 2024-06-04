@@ -2,6 +2,7 @@ package com.h3hitema.cyberProject;
 
 import com.h3hitema.cyberProject.repository.UserRepository;
 import com.h3hitema.cyberProject.model.UserEntity;
+import io.github.cdimascio.dotenv.Dotenv;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -18,15 +19,16 @@ public class CyberProjectApplication {
 	@Bean
 	CommandLineRunner commandLineRunner(UserRepository userRepository, PasswordEncoder passwordEncoder){
 		return args -> {
+			Dotenv dotenv = Dotenv.load();
 			UserEntity manager = new UserEntity();
-			manager.setUsername("user");
-			manager.setPassword(passwordEncoder.encode("Password0"));
-			manager.setRoles("ROLE_USER");
+			manager.setUsername(dotenv.get("U_USERNAME"));
+			manager.setPassword(passwordEncoder.encode(dotenv.get("U_PASSWORD")));
+			manager.setRoles(dotenv.get("U_ROLES"));
 
 			UserEntity admin = new UserEntity();
-			admin.setUsername("admin");
-			admin.setPassword(passwordEncoder.encode("Admin@123"));
-			admin.setRoles("ROLE_ADMIN");
+			admin.setUsername(dotenv.get("A_USERNAME"));
+			admin.setPassword(passwordEncoder.encode(dotenv.get("A_PASSWORD")));
+			admin.setRoles(dotenv.get("A_ROLES"));
 			userRepository.saveAll(List.of(manager,admin));
 		};
 	}
