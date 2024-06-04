@@ -11,6 +11,7 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -44,14 +45,18 @@ public class SecurityConfig {
     @Bean
     @Order(2)
     public SecurityFilterChain apiSecurityFilterChain(HttpSecurity httpSecurity) throws Exception {
-        return httpSecurity
+        httpSecurity
                 .securityMatcher(new AntPathRequestMatcher("/api/**"))
-                .csrf(AbstractHttpConfigurer::disable) //CRSF protection is a crucial security measure to prevent Cross-Site Forgery attacks. Hence, it’s advisable to include the CRSF token in the request header of state-changing operations.
                 .authorizeHttpRequests(auth -> auth.anyRequest().authenticated())
                 .userDetailsService(jpaUserDetailsManagerConfig)
                 .formLogin(withDefaults())
-                .httpBasic(withDefaults())
-                .build();
+                .httpBasic(withDefaults());
+        httpSecurity.csrf(csrf -> csrf
+                .requireCsrfProtectionMatcher(new AntPathRequestMatcher("/api/**"))
+                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()) // or any other CsrfTokenRepository you prefer
+                .ignoringRequestMatchers(new AntPathRequestMatcher("/api/**", "GET"))
+        );
+        return httpSecurity.build();
     }
 
     @Bean
