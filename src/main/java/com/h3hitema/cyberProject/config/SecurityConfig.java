@@ -32,9 +32,11 @@ public class SecurityConfig {
         httpSecurity
                 .securityMatcher(new AntPathRequestMatcher(("/h2-console/**")))
                 .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
-                .csrf(csrf -> csrf.ignoringRequestMatchers(AntPathRequestMatcher.antMatcher("/h2-console/**")))
                 .headers(headers -> headers.frameOptions(withDefaults()).disable());
         httpSecurity.sessionManagement(session -> session.sessionFixation().migrateSession());
+        httpSecurity.csrf(csrf -> csrf
+                .ignoringRequestMatchers(new AntPathRequestMatcher("/h2-console/**"))
+        );
         httpSecurity.headers(headers -> headers.contentSecurityPolicy(csp -> csp.policyDirectives("script-src 'self'")));
         return httpSecurity.build();
     }
